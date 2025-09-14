@@ -13,7 +13,7 @@
     state: absent
 
 - name: Stow
-  ansible.builtin.command: chdir={{ ansible_env.HOME) }}/.dotfiles stow . -d . -t "{{ ansible_env.HOME }}"
+  ansible.builtin.command: chdir={{ ansible_env.HOME }}/.dotfiles stow . -d . -t "{{ ansible_env.HOME }}"
 
 - name: Set disable admin-flag file
   become: true

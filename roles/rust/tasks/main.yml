@@ -21,6 +21,7 @@
   ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
   changed_when: true
   loop:
+    - eza
     - eva
     - bat
     - zoxide
@@ -37,13 +38,22 @@
     - du-dust
     - hyperfine
     - bandwhich
-    - sd
     - procs
     - tealdeer
     - fd-find
-    - silicon
+    # - silicon
+    - sd
   tags:
     - dev
     - update
     - rust
 
+- name: Install stylua
+  ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
+  changed_when: true
+  loop:
+    - stylua
+  tags:
+    - dev
+    - neovim
+    - rust

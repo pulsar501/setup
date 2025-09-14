@@ -1,4 +1,22 @@
 ---
+- name: "XDG dirs"
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+    recurse: true
+  loop:
+    - "{{ ansible_env.HOME}}/code"
+    - "{{ ansible_env.XDG_CONFIG_HOME }}"
+    - "{{ ansible_env.XDG_DATA_HOME }}"
+    - "{{ ansible_env.XDG_CACHE_HOME }}"
+    - "{{ ansible_env.XDG_STATE_HOME }}"
+  tags:
+    - core
+
 - name: "/opt"
   become: true
   ansible.builtin.file:
@@ -11,8 +29,8 @@
   tags:
     - core
 
-
 - name: "{{ ansible_env.HOME }}/setup"
+  become: true
   ansible.builtin.file:
     state: directory
     owner: "{{ ansible_user }}"

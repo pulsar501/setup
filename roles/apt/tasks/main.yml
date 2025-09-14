@@ -19,6 +19,8 @@
       - yamllint
       - stow
       - build-essential
+      - pkg-config
+      - libfontconfig
       - software-properties-common
   tags:
     - install
@@ -28,15 +30,15 @@
   become: true
   ansible.builtin.apt:
     name:
-      - ffmpeg
-      - pkg-config
+      # - ffmpeg
       - apache2-utils
       - imagemagick
+      - cmake
       - nmap
       - fontconfig
       - libtool
-      - lintool-bin
-      - wslu
+      - libtool-bin
+      # - wslu
   tags:
     - install
     - core

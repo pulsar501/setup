@@ -41,16 +41,6 @@
     - dev
     - neovim
 
-- name: Install stylua
-  ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
-  changed_when: true
-  loop:
-    - stylua
-  tags:
-    - dev
-    - neovim
-    - rust
-
 - name: Remove neovim src dir
   ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/neovim"

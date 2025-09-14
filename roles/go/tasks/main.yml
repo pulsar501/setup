@@ -1,0 +1,44 @@
+---
+- name: Download go
+  vars:
+    arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+  ansible.builtin.get_url:
+    url: https://go.dev/dl/go1.23.0.linux-{{ arch }}.tar.gz
+    dest: /tmp/go1.23.0.tar.gz
+    mode: "0644"
+  tags: ["go", "dev"]
+
+- name: Extract go arch={{ ansible_architecture }} {{ inventory_hostname }}
+  become: true
+  ansible.builtin.unarchive:
+    src: /tmp/go1.23.0.tar.gz
+    dest: /usr/local
+    remote_src: "{{ inventory_hostname != 'localhost' }}"
+  tags: ["go", "dev"]
+
+- name: Remove installer
+  ansible.builtin.file:
+    path: /tmp/go1.23.0.tar.gz
+    state: absent
+  tags: ["go", "dev"]
+
+- name: Go tools
+  ansible.builtin.shell: |
+    GOPATH="$XDG_DATA_HOME"/go /usr/local/go/bin/go install {{ item }}
+  changed_when: true
+  loop:
+    - github.com/charmbracelet/glow@latest
+    - github.com/charmbracelet/gum@latest
+  tags: ["go", "dev"]
+
+- name: Go dev-tools
+  ansible.builtin.shell: |
+    GOPATH="$XDG_DATA_HOME"/go /usr/local/go/bin/go install {{ item }}
+  changed_when: true
+  loop:
+    - github.com/incu6us/goimports-reviser/v3@latest
+    - mvdan.cc/gofumpt@latest
+    - github.com/segmentio/golines@latest
+    - github.com/jesseduffield/lazydocker@latest
+    - github.com/mikefarah/yq/v4@latest
+  tags: ["go", "dev"]

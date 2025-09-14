@@ -1,5 +1,5 @@
 ---
-- name: Install System Packages
+- name: Install XDG Ninja
   become: true
   changed_when: true
   ansible.builtin.git:
@@ -8,13 +8,21 @@
     dest: /opt/xdg-ninja
     update: true
     force: true
-  tags: [ "dev", "tool" ]
+  tags: ["dev", "tool"]
+
+- name: Prepare httpie install
+  become: true
+  vars:
+    arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+  ansible.builtin.shell: |
+    curl -SsL https://packages.httpie.io/deb/KEY.gpg | gpg --dearmor --yes -o /usr/share/keyrings/httpie.gpg
+    echo "deb [arch={{ arch }} signed-by=/usr/share/keyrings/httpie.gpg] https://packages.httpie.io/deb ./" > /etc/apt/sources.list.d/httpie.list
+  tags: ["dev", "tool"]
 
 - name: Install httpie
   become: true
-  ansible.builtin.shell: |
-    curl -SsL https://packages.httpie.io/deb/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/httpie.gpg
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/httpie.gpg] https://packages.httpie.io/deb ./" | sudo tee /etc/apt/sources.list.d/httpie.list > /dev/null
-    sudo apt update
-    sudo apt install httpie
-  tags: [ "dev", "tool" ]
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - httpie
+  tags: ["dev", "tool"]

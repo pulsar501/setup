@@ -1,35 +1,46 @@
 ---
 - name: Downloaf fzf from git
-  become: true
+  # become: true
   ansible.builtin.git:
     repo: https://github.com/junegunn/fzf.git
     depth: 1
     dest: /opt/fzf
     force: true
-  tags: [ "core", "tool" ]
+
+  tags: ["core", "tool"]
 
 - name: Glamour themes
-  become: true
+  # become: true
   ansible.builtin.git:
     repo: https://github.com/catppuccin/glamour.git
     version: v1.0.0
     dest: /opt/catppuccin/glamour
     force: true
-  tags: [ "core", "tool" ]
+  tags: ["core", "tool"]
+
+# - name: "/opt"
+#   become: true
+#   ansible.builtin.file:
+#     path: "/opt"
+#     state: directory
+#     owner: "{{ ansible_user }}"
+#     group: "{{ ansible_user }}"
+#     mode: "0755"
+#     recurse: true
+#   tags:
+#     - core
 
 - name: Install fzf
   ansible.builtin.shell: |
     bash -c "/opt/fzf/install --all --xdg --key-bindings --completion --no-update-rc"
   changed_when: true
-  tags: [ "core", "tool" ]
+  tags: ["core", "tool"]
 
 - name: Build Glamour
   become: true
   changed_when: true
   ansible.builtin.shell: |
     chdir=/opt/catppuccin/glamour/
-    pip install -r requirements.txt 
+    pip install -r requirements.txt --break-system-packages
     python src/generate.py
-  tags: [ "core", "tool" ]
-
-
+  tags: ["core", "tool"]
