@@ -1,4 +1,13 @@
 ---
+- name: Ensure Global config
+  become: true
+  ansible.builtin.blockinfile:
+    dest: /etc/npmrc
+    block: "{{ lookup('template', 'npmrc.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED"
+  tags:
+    - node
+    - dev
 - name: Ensure nvm dir exits
   ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/.local/share/nvm"

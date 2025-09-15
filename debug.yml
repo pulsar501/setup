@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- hosts:
+    - localhost
   gather_facts: true
   environment:
     SESS_VAR: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}/') }}"

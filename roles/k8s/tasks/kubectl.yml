@@ -1,0 +1,9 @@
+---
+- name: Get latest kubectl version
+  set_fact:
+    kubectl_version: "{{ lookup('url', 'https://dl.k8s.io/release/stable.txt') }}"
+- name: Download binary
+  vars:
+    arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+  ansible.builtin.get_url:
+    url: curl -LO "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ arch }}/kubectl"
