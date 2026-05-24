@@ -1,0 +1,54 @@
+---
+- name: Install Homebrew
+  ansible.builtin.shell: |
+    set -o pipefail
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  args:
+    creates: /opt/homebrew/bin/brew
+  environment:
+    NONINTERACTIVE: "1"
+  tags: ["homebrew", "core"]
+
+- name: Install GNU coreutils and compat tools
+  # Provides GNU sha256sum, date -d, etc. PATH prepended in path.sh.
+  # Priority: rust CLIs > these GNU tools > BSD system tools.
+  community.general.homebrew:
+    name:
+      - coreutils
+      - findutils
+      - gnu-sed
+      - gawk
+      - grep
+      - gnu-tar
+    state: present
+  tags: ["homebrew", "core"]
+
+- name: Install core CLI tools via Homebrew
+  community.general.homebrew:
+    name:
+      - curl
+      - wget
+      - git
+      - tmux
+      - jq
+      - yq
+      - gnupg
+      - stow
+      - unzip
+      - zip
+      - lua
+      - xdg-ninja
+    state: present
+  tags: ["homebrew", "core"]
+
+- name: Install 1Password CLI via Homebrew
+  community.general.homebrew:
+    name: 1password-cli
+    state: present
+  tags: ["homebrew", "1password"]
+
+- name: Install starship via Homebrew
+  community.general.homebrew:
+    name: starship
+    state: present
+  tags: ["homebrew", "core"]

@@ -1,41 +1,65 @@
 ---
-- name: Get latest
+- name: Get latest btop version
   ansible.builtin.uri:
     url: "https://github.com/aristocratos/btop/releases/latest"
     method: GET
   register: response
   tags: &btop_tags [ "btop", "core" ]
+  when: ansible_facts['os_family'] != 'Darwin'
 
-- name: Set latest version url
+- name: Set latest btop version
   ansible.builtin.set_fact:
     btop_version: "{{ response.url | regex_search('v[0-9]+.[0-9]+.[0-9]+') }}"
   tags: *btop_tags
+  when: ansible_facts['os_family'] != 'Darwin'
+
+- name: Set btop architecture
+  vars:
+    arch_map:
+      x86_64: x86_64
+      aarch64: aarch64
+      arm64: aarch64
+  ansible.builtin.set_fact:
+    btop_arch: "{{ arch_map[ansible_architecture] | default(ansible_architecture) }}"
+  tags: *btop_tags
+  when: ansible_facts['os_family'] != 'Darwin'
 
 - name: Download btop
   ansible.builtin.get_url:
-    url: "https://github.com/aristocratos/btop/releases/download/{{ btop_version }}/btop-x86_64-linux-musl.tbz"
-    dest: /tmp/btop-x86_64-linux-musl.tar.bz2
+    url: "https://github.com/aristocratos/btop/releases/download/{{ btop_version }}/btop-{{ btop_arch }}-linux-musl.tbz"
+    dest: "/tmp/btop-{{ btop_arch }}-linux-musl.tar.bz2"
     mode: "0755"
     force: true
   tags: *btop_tags
+  when: ansible_facts['os_family'] != 'Darwin'
 
 - name: Unpack btop
   ansible.builtin.unarchive:
-    src: /tmp/btop-x86_64-linux-musl.tar.bz2
+    src: "/tmp/btop-{{ btop_arch }}-linux-musl.tar.bz2"
     dest: /opt/
     mode: "0755"
   tags: *btop_tags
+  when: ansible_facts['os_family'] != 'Darwin'
 
-- name: Install btop
+- name: Install btop (Linux)
   ansible.builtin.make:
     chdir: /opt/btop
     target: install
   become: true
   tags: *btop_tags
+  when: ansible_facts['os_family'] != 'Darwin'
 
-- name: set suid bit for btop
+- name: Set suid bit for btop (Linux)
   ansible.builtin.make:
     chdir: /opt/btop
     target: setuid
   become: true
   tags: *btop_tags
+  when: ansible_facts['os_family'] != 'Darwin'
+
+- name: Install btop (macOS via Homebrew)
+  community.general.homebrew:
+    name: btop
+    state: present
+  tags: *btop_tags
+  when: ansible_facts['os_family'] == 'Darwin'

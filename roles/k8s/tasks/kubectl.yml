@@ -1,9 +1,29 @@
 ---
 - name: Get latest kubectl version
-  set_fact:
-    kubectl_version: "{{ lookup('url', 'https://dl.k8s.io/release/stable.txt') }}"
-- name: Download binary
+  ansible.builtin.uri:
+    url: https://dl.k8s.io/release/stable.txt
+    return_content: true
+  register: kubectl_version
+  tags: &kubectl_tags ["dev", "kubectl"]
+
+- name: Get kubectl binary checksum
   vars:
     arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+    os_type: "{{ 'darwin' if ansible_facts.os_family == 'Darwin' else 'linux' }}"
+  ansible.builtin.uri:
+    url: "https://dl.k8s.io/release/{{ kubectl_version.content }}/bin/{{ os_type }}/{{ arch }}/kubectl.sha256"
+    return_content: true
+  register: kubectl_checksum
+  tags: *kubectl_tags
+
+- name: Download binary
+  become: true
+  vars:
+    arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+    os_type: "{{ 'darwin' if ansible_facts.os_family == 'Darwin' else 'linux' }}"
   ansible.builtin.get_url:
-    url: curl -LO "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ arch }}/kubectl"
+    url: https://dl.k8s.io/release/{{ kubectl_version.content }}/bin/{{ os_type }}/{{ arch }}/kubectl
+    dest: /usr/local/bin/kubectl
+    checksum: "sha256:{{ kubectl_checksum.content }}"
+    mode: 0755
+  tags: *kubectl_tags

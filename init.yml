@@ -5,38 +5,48 @@
     source_key_pub: "./secrets/ssh/id_rsa.pub"
     dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
     dest_key_pub: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
-    personal: "{{ lookup('env', 'HOME') }}/private"
     me: "{{ lookup('env', 'USER') }}"
-    # cfg_cmd: "git --git-dir={{ lookup('env', 'HOME') }}/.cfg/ --work-tree={{ lookup('env', 'HOME') }}"
+    is_macos: "{{ ansible_facts['os_family'] == 'Darwin' }}"
+    is_linux: "{{ ansible_facts['os_family'] != 'Darwin' }}"
+    is_wsl: "{{ lookup('env', 'WSL_DISTRO_NAME') != '' }}"
 
   pre_tasks:
-    - name: Update Apt
+    - name: Gather facts
+      ansible.builtin.setup:
+
+    - name: Update apt cache (Linux only)
       become: true
-      apt:
+      ansible.builtin.apt:
         force_apt_get: true
         update_cache: true
         state: present
-    - name: Print all available facts
-      ansible.builtin.debug:
-        var: ansible_facts
+      when: ansible_facts['os_family'] != 'Darwin'
+
   environment:
-    XDG_CONFIG_HOME: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.config"
-    XDG_CACHE_HOME: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.cache"
-    XDG_DATA_HOME: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.local/share"
-    XDG_STATE_HOME: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.local/state"
-    # XDG_RUNTIME_DIR: "/run/user/{{ ansible_facts.user_uid }}"
-    ZDOTDIR: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.config/zsh"
-    ZSH: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}.config/zsh/ohmyzsh"
-    CARGO_HOME: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.local/share/cargo"
-    RUSTUP_HOME: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.local/share/rustup"
-    NVM_DIR: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.config/nvm"
-    BUN_INSTALL: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.local/share/bun"
-    GOPATH: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.local/share/go"
-    DOCKER_CONFIG: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.config/docker"
-    ANSIBLE_HOME: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.local/share/ansible"
-    GNUPGHOME: "{{ ansible_env.HOME | default('/home/{{ ansible_user }}') }}/.local/share/gnupg"
+    XDG_CONFIG_HOME: "{{ ansible_env.HOME }}/.config"
+    XDG_CACHE_HOME: "{{ ansible_env.HOME }}/.cache"
+    XDG_DATA_HOME: "{{ ansible_env.HOME }}/.local/share"
+    XDG_STATE_HOME: "{{ ansible_env.HOME }}/.local/state"
+    ZDOTDIR: "{{ ansible_env.HOME }}/.config/zsh"
+    ZSH: "{{ ansible_env.HOME }}/.config/zsh/ohmyzsh"
+    CARGO_HOME: "{{ ansible_env.HOME }}/.local/share/cargo"
+    RUSTUP_HOME: "{{ ansible_env.HOME }}/.local/share/rustup"
+    NVM_DIR: "{{ ansible_env.HOME }}/.local/share/nvm"
+    BUN_INSTALL: "{{ ansible_env.HOME }}/.local/share/bun"
+    GOPATH: "{{ ansible_env.HOME }}/.local/share/go"
+    DOCKER_CONFIG: "{{ ansible_env.HOME }}/.config/docker"
+    ANSIBLE_HOME: "{{ ansible_env.HOME }}/.local/share/ansible"
+    GNUPGHOME: "{{ ansible_env.HOME }}/.local/share/gnupg"
+
   roles:
-    - apt
+    # macOS: Homebrew first — provides package manager and GNU tools
+    - role: homebrew
+      when: is_macos | bool
+
+    # Linux: apt packages
+    - role: apt
+      when: is_linux | bool
+
     - dirs
     - role: ssh
       when: inventory_hostname == "localhost"
@@ -44,10 +54,12 @@
     - zsh
     - neovim
     - role: fonts
-      when: inventory_hostname == "localhost"
+      when: is_linux | bool
     - tools
-    - 1password
+    - role: 1password
+      when: is_linux | bool  # macOS handled inside homebrew role
     - rust
     - go
     - role: node
       when: inventory_hostname == "localhost"
+    - k8s
