@@ -1,0 +1,10 @@
+---
+# On macOS golangci-lint comes from Homebrew. Linux only.
+- name: Install golangci-lint via official install script
+  become: true
+  ansible.builtin.shell: |
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
+      | sh -s -- -b /usr/local/bin
+  changed_when: true
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: ["dev", "go", "golangci-lint"]

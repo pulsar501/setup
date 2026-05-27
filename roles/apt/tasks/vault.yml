@@ -1,0 +1,25 @@
+---
+- name: Add HashiCorp apt key
+  become: true
+  ansible.builtin.shell: |
+    wget -O- https://apt.releases.hashicorp.com/gpg \
+      | gpg --dearmor --yes -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  tags: &vault_tags ["dev", "vault"]
+
+- name: Add HashiCorp apt repository
+  become: true
+  ansible.builtin.shell: |
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main" \
+      > /etc/apt/sources.list.d/hashicorp.list
+  args:
+    creates: /etc/apt/sources.list.d/hashicorp.list
+  tags: *vault_tags
+
+- name: Install vault
+  become: true
+  ansible.builtin.apt:
+    name: vault
+    update_cache: true
+  tags: *vault_tags

@@ -1,6 +1,8 @@
 ---
 - include_tasks: gh.yml
   tags: ["dev", "gh"]
+- include_tasks: vault.yml
+  tags: ["dev", "vault"]
 
 - name: "Install core packages"
   become: true
@@ -41,8 +43,21 @@
       - fontconfig
       - libtool
       - libtool-bin
-      # - wslu
+      - luarocks
+      - skopeo
+      - podman
+      - speedtest-cli
   tags:
     - install
     - core
     - dev
+
+- name: Install WSL utilities
+  become: true
+  ansible.builtin.apt:
+    name: wslu
+  when: lookup('env', 'WSL_DISTRO_NAME') != ''
+  tags:
+    - install
+    - core
+    - wsl

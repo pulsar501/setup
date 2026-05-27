@@ -8,19 +8,21 @@
     me: "{{ lookup('env', 'USER') }}"
     is_macos: "{{ ansible_facts['os_family'] == 'Darwin' }}"
     is_linux: "{{ ansible_facts['os_family'] != 'Darwin' }}"
+    is_arch: "{{ ansible_facts['os_family'] == 'Archlinux' }}"
+    is_debian: "{{ ansible_facts['os_family'] == 'Debian' }}"
     is_wsl: "{{ lookup('env', 'WSL_DISTRO_NAME') != '' }}"
 
   pre_tasks:
     - name: Gather facts
       ansible.builtin.setup:
 
-    - name: Update apt cache (Linux only)
+    - name: Update apt cache (Debian/Ubuntu only)
       become: true
       ansible.builtin.apt:
         force_apt_get: true
         update_cache: true
         state: present
-      when: ansible_facts['os_family'] != 'Darwin'
+      when: ansible_facts['os_family'] == 'Debian'
 
   environment:
     XDG_CONFIG_HOME: "{{ ansible_env.HOME }}/.config"
@@ -39,13 +41,13 @@
     GNUPGHOME: "{{ ansible_env.HOME }}/.local/share/gnupg"
 
   roles:
-    # macOS: Homebrew first — provides package manager and GNU tools
+    # package managers — mutually exclusive by OS family
     - role: homebrew
       when: is_macos | bool
-
-    # Linux: apt packages
     - role: apt
-      when: is_linux | bool
+      when: is_debian | bool
+    - role: pacman
+      when: is_arch | bool
 
     - dirs
     - role: ssh
@@ -57,7 +59,7 @@
       when: is_linux | bool
     - tools
     - role: 1password
-      when: is_linux | bool  # macOS handled inside homebrew role
+      when: is_debian | bool  # Arch: via pacman AUR; macOS: via homebrew cask
     - rust
     - go
     - role: node

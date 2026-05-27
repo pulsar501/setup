@@ -1,0 +1,78 @@
+---
+- name: Update system
+  become: true
+  community.general.pacman:
+    update_cache: true
+    upgrade: true
+  tags: ["pacman", "core"]
+
+- name: Install core packages
+  become: true
+  community.general.pacman:
+    name:
+      - curl
+      - wget
+      - git
+      - tmux
+      - jq
+      - gnupg
+      - stow
+      - unzip
+      - zip
+      - nmap
+      - python-httpie
+      - yamllint
+      - xdg-utils
+      - base-devel
+      - pkgconf
+      - cmake
+      - fontconfig
+      - libtool
+      - imagemagick
+      - luarocks
+      - skopeo
+      - podman
+      - lua-language-server
+      - python-pipx
+    state: present
+  tags: ["pacman", "core"]
+
+- name: Check if yay is installed
+  ansible.builtin.command: which yay
+  register: yay_check
+  changed_when: false
+  failed_when: false
+
+- name: Clone yay from AUR
+  ansible.builtin.git:
+    repo: https://aur.archlinux.org/yay.git
+    dest: /tmp/yay
+    force: true
+  become: false
+  when: yay_check.rc != 0
+
+- name: Build and install yay
+  # makepkg must not run as root
+  ansible.builtin.shell: cd /tmp/yay && makepkg -si --noconfirm
+  become: false
+  when: yay_check.rc != 0
+  tags: ["pacman", "core"]
+
+- name: Install AUR packages
+  ansible.builtin.shell: yay -S --noconfirm --needed {{ item }}
+  become: false
+  changed_when: true
+  loop:
+    - yq            # YAML processor (mikefarah/yq)
+    - speedtest-cli # speed test
+    - luacheck      # Lua linter
+    - vault-bin     # HashiCorp Vault
+    - 1password-cli # 1Password CLI
+  tags: ["pacman", "aur"]
+
+- name: Install wslu (WSL utilities for Arch WSL)
+  ansible.builtin.shell: yay -S --noconfirm --needed wslu
+  become: false
+  changed_when: true
+  when: lookup('env', 'WSL_DISTRO_NAME') != ''
+  tags: ["pacman", "aur", "wsl"]

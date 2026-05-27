@@ -1,0 +1,36 @@
+---
+# On macOS tflint comes from Homebrew. Linux only.
+- name: Get latest tflint version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/terraform-linters/tflint/releases/latest
+    body_format: json
+    return_content: true
+  register: tflint_release
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: &tflint_tags ["dev", "tflint"]
+
+- name: Download tflint archive
+  vars:
+    arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+  ansible.builtin.get_url:
+    url: "https://github.com/terraform-linters/tflint/releases/download/{{ tflint_release.json.tag_name }}/tflint_linux_{{ arch }}.zip"
+    dest: /tmp/tflint.zip
+    mode: "0644"
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: *tflint_tags
+
+- name: Unpack tflint binary
+  become: true
+  ansible.builtin.unarchive:
+    src: /tmp/tflint.zip
+    dest: /usr/local/bin
+    mode: "0755"
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: *tflint_tags
+
+- name: Remove tflint archive
+  ansible.builtin.file:
+    path: /tmp/tflint.zip
+    state: absent
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: *tflint_tags

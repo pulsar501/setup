@@ -1,0 +1,9 @@
+---
+# On macOS flux comes from Homebrew. Linux only.
+- name: Install flux CLI via official install script
+  become: true
+  ansible.builtin.shell: |
+    curl -s https://fluxcd.io/install.sh | bash
+  changed_when: true
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: ["dev", "k8s", "flux"]

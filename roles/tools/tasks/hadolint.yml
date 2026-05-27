@@ -1,0 +1,21 @@
+---
+# On macOS hadolint comes from Homebrew. Linux only.
+- name: Get latest hadolint version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/hadolint/hadolint/releases/latest
+    body_format: json
+    return_content: true
+  register: hadolint_release
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: &hadolint_tags ["dev", "hadolint"]
+
+- name: Download hadolint binary
+  become: true
+  vars:
+    arch: "{{ 'x86_64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+  ansible.builtin.get_url:
+    url: "https://github.com/hadolint/hadolint/releases/download/{{ hadolint_release.json.tag_name }}/hadolint-Linux-{{ arch }}"
+    dest: /usr/local/bin/hadolint
+    mode: "0755"
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: *hadolint_tags

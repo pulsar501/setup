@@ -1,0 +1,21 @@
+---
+# On macOS terragrunt comes from Homebrew. Linux only.
+- name: Get latest terragrunt version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/gruntwork-io/terragrunt/releases/latest
+    body_format: json
+    return_content: true
+  register: terragrunt_release
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: &tg_tags ["dev", "terragrunt"]
+
+- name: Download terragrunt binary
+  become: true
+  vars:
+    arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+  ansible.builtin.get_url:
+    url: "https://github.com/gruntwork-io/terragrunt/releases/download/{{ terragrunt_release.json.tag_name }}/terragrunt_linux_{{ arch }}"
+    dest: /usr/local/bin/terragrunt
+    mode: "0755"
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: *tg_tags

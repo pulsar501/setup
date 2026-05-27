@@ -1,13 +1,27 @@
 ---
 - include_tasks: btop.yml
-  tags: [ "core", "tool" ]
+  tags: ["core", "tool"]
 - include_tasks: misc.yml
-  tags: [ "core", "tool" ]
+  tags: ["core", "tool"]
 - include_tasks: entr.yml
-  tags: [ "dev", "tool" ]
+  tags: ["dev", "tool"]
+- include_tasks: terragrunt.yml
+  tags: ["dev", "terragrunt"]
+- include_tasks: tflint.yml
+  tags: ["dev", "tflint"]
+- include_tasks: hadolint.yml
+  tags: ["dev", "hadolint"]
+- include_tasks: proselint.yml
+  tags: ["dev", "proselint"]
+- include_tasks: golangci-lint.yml
+  tags: ["dev", "golangci-lint"]
+- include_tasks: lua-ls.yml
+  tags: ["dev", "neovim", "lua-ls"]
+- include_tasks: luacheck.yml
+  tags: ["dev", "neovim", "lua"]
 - include_tasks: glab.yml
-  tags: [ "dev", "glab" ]
+  tags: ["dev", "glab"]
   when: inventory_hostname == "localhost"
 - include_tasks: localhost.yml
-  tags: [ "dev", "tool" ]
+  tags: ["dev", "tool"]
   when: inventory_hostname == "localhost"

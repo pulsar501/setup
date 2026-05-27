@@ -5,3 +5,5 @@
   tags: ["dev", "helm"]
 - include_tasks: k9s.yml
   tags: ["dev", "k9s"]
+- include_tasks: flux.yml
+  tags: ["dev", "flux"]
