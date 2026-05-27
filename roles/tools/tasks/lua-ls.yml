@@ -1,12 +1,12 @@
 ---
-# On macOS lua-language-server comes from Homebrew. Linux only.
+# On macOS lua-language-server comes from Homebrew; on Arch via pacman. Debian only.
 - name: Get latest lua-language-server version
   ansible.builtin.uri:
     url: https://api.github.com/repos/LuaLS/lua-language-server/releases/latest
     body_format: json
     return_content: true
   register: lua_ls_release
-  when: ansible_facts['os_family'] != 'Darwin'
+  when: ansible_facts['os_family'] == 'Debian'
   tags: &lua_ls_tags ["dev", "neovim", "lua-ls"]
 
 - name: Download lua-language-server archive
@@ -16,7 +16,7 @@
     url: "https://github.com/LuaLS/lua-language-server/releases/download/{{ lua_ls_release.json.tag_name }}/lua-language-server-{{ lua_ls_release.json.tag_name }}-linux-{{ arch }}.tar.gz"
     dest: /tmp/lua-ls.tar.gz
     mode: "0644"
-  when: ansible_facts['os_family'] != 'Darwin'
+  when: ansible_facts['os_family'] == 'Debian'
   tags: *lua_ls_tags
 
 - name: Create install dir for lua-language-server
@@ -25,7 +25,7 @@
     path: /opt/lua-language-server
     state: directory
     mode: "0755"
-  when: ansible_facts['os_family'] != 'Darwin'
+  when: ansible_facts['os_family'] == 'Debian'
   tags: *lua_ls_tags
 
 - name: Unpack lua-language-server
@@ -34,7 +34,7 @@
     src: /tmp/lua-ls.tar.gz
     dest: /opt/lua-language-server
     mode: "0755"
-  when: ansible_facts['os_family'] != 'Darwin'
+  when: ansible_facts['os_family'] == 'Debian'
   tags: *lua_ls_tags
 
 - name: Symlink lua-language-server to PATH
@@ -43,12 +43,12 @@
     src: /opt/lua-language-server/bin/lua-language-server
     dest: /usr/local/bin/lua-language-server
     state: link
-  when: ansible_facts['os_family'] != 'Darwin'
+  when: ansible_facts['os_family'] == 'Debian'
   tags: *lua_ls_tags
 
 - name: Remove lua-ls archive
   ansible.builtin.file:
     path: /tmp/lua-ls.tar.gz
     state: absent
-  when: ansible_facts['os_family'] != 'Darwin'
+  when: ansible_facts['os_family'] == 'Debian'
   tags: *lua_ls_tags
