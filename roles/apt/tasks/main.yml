@@ -1,4 +1,7 @@
 ---
+- include_tasks: gh.yml
+  tags: ["dev", "gh"]
+
 - name: "Install core packages"
   become: true
   ansible.builtin.apt:

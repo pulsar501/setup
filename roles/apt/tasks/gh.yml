@@ -1,0 +1,25 @@
+---
+- name: Add GitHub CLI apt key
+  become: true
+  ansible.builtin.shell: |
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      | gpg --dearmor --yes -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/githubcli-archive-keyring.gpg
+  tags: &gh_tags ["dev", "gh"]
+
+- name: Add GitHub CLI apt repository
+  become: true
+  ansible.builtin.shell: |
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+      > /etc/apt/sources.list.d/github-cli.list
+  args:
+    creates: /etc/apt/sources.list.d/github-cli.list
+  tags: *gh_tags
+
+- name: Install gh
+  become: true
+  ansible.builtin.apt:
+    name: gh
+    update_cache: true
+  tags: *gh_tags
