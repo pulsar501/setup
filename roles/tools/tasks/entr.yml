@@ -1,22 +1,26 @@
 ---
-- name: Download repository
+# On macOS entr comes from Homebrew. Linux only.
+- name: Download entr repository
   ansible.builtin.git:
     repo: https://github.com/eradman/entr
     dest: /opt/entr
     force: true
     update: true
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: &entr_tags [ "entr", "dev" ]
 
 - name: Run configure
   ansible.builtin.shell:
     cmd: ./configure
     chdir: /opt/entr/
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *entr_tags
 
 - name: Make test
   ansible.builtin.make:
     chdir: /opt/entr/
     target: test
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *entr_tags
 
 - name: Make install
@@ -24,4 +28,5 @@
   ansible.builtin.make:
     chdir: /opt/entr/
     target: install
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *entr_tags

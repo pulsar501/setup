@@ -1,0 +1,14 @@
+---
+- name: Install GUI apps via Homebrew Cask
+  community.general.homebrew_cask:
+    name:
+      - font-hack-nerd-font
+      - ghostty
+      - raycast
+      - rectangle
+      - alt-tab
+      - keycastr
+      - 1password
+      - discord
+    state: present
+  tags: ["homebrew", "cask"]

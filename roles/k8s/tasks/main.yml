@@ -1,6 +1,7 @@
-
 ---
 - include_tasks: kubectl.yml
-  tags: &k8s_tags [ "core", "k8s" ]
+  tags: ["core", "k8s"]
 - include_tasks: helm.yml
-  tags: *k8s_tags
+  tags: ["dev", "helm"]
+- include_tasks: k9s.yml
+  tags: ["dev", "k9s"]

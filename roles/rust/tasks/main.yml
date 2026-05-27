@@ -18,8 +18,10 @@
     - rust
 
 - name: Install core CLI tools (rust rewrites for common utils)
+  # On macOS these come from Homebrew (pre-compiled bottles). Linux only.
   ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
   changed_when: true
+  when: ansible_facts['os_family'] != 'Darwin'
   loop:
     - eza        # ls
     - bat        # cat / less
@@ -32,8 +34,10 @@
     - rust
 
 - name: Install dev CLI tools (rust rewrites)
+  # On macOS these come from Homebrew (pre-compiled bottles). Linux only.
   ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
   changed_when: true
+  when: ansible_facts['os_family'] != 'Darwin'
   loop:
     - ripgrep    # grep
     - fd-find    # find
@@ -51,8 +55,10 @@
     - rust
 
 - name: Install neovim tooling
+  # On macOS stylua comes from Homebrew. Linux only.
   ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
   changed_when: true
+  when: ansible_facts['os_family'] != 'Darwin'
   loop:
     - stylua
   tags:

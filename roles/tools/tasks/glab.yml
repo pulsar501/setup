@@ -1,9 +1,11 @@
 ---
+# On macOS glab comes from Homebrew. Linux only.
 - name: Get latest glab release
   ansible.builtin.uri:
     url: https://gitlab.com/api/v4/projects/gitlab-org%2Fcli/releases
     return_content: true
   register: glab_releases
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: &glab_tags ["dev", "glab"]
 
 - name: Set glab version and platform facts
@@ -15,11 +17,11 @@
     os_map:
       Debian: linux
       Ubuntu: linux
-      Darwin: darwin
   ansible.builtin.set_fact:
     glab_version: "{{ (glab_releases.json | first).name }}"
     glab_arch: "{{ arch_map[ansible_architecture] | default(ansible_architecture) }}"
     glab_os: "{{ os_map[ansible_facts['os_family']] | default('linux') }}"
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *glab_tags
 
 - name: Get glab checksums
@@ -27,15 +29,18 @@
     url: "https://gitlab.com/gitlab-org/cli/-/releases/{{ glab_version }}/downloads/checksums.txt"
     return_content: true
   register: glab_checksums
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *glab_tags
 
 - name: Set glab checksum
   ansible.builtin.set_fact:
     glab_checksum: "{{ item.split(' ')[0] }}"
   loop: "{{ glab_checksums.content.split('\n') }}"
-  when: >
-    'glab_' + (glab_version | regex_replace('^v', '')) + '_' + glab_os + '_' + glab_arch + '.tar.gz'
-    in item
+  when:
+    - ansible_facts['os_family'] != 'Darwin'
+    - >-
+      'glab_' + (glab_version | regex_replace('^v', '')) + '_' + glab_os + '_' + glab_arch + '.tar.gz'
+      in item
   tags: *glab_tags
 
 - name: Download glab archive
@@ -44,6 +49,7 @@
     url: "https://gitlab.com/gitlab-org/cli/-/releases/{{ glab_version }}/downloads/glab_{{ glab_version | regex_replace('^v', '') }}_{{ glab_os }}_{{ glab_arch }}.tar.gz"
     dest: /tmp/glab.tar.gz
     checksum: "sha256:{{ glab_checksum }}"
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *glab_tags
 
 - name: Unpack glab binary
@@ -54,10 +60,12 @@
     extra_opts: ["bin/glab", "--strip-components=1"]
     remote_src: true
     mode: "0755"
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *glab_tags
 
 - name: Remove glab install archive
   ansible.builtin.file:
     path: /tmp/glab.tar.gz
     state: absent
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *glab_tags

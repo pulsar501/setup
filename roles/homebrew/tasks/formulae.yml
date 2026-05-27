@@ -1,0 +1,104 @@
+---
+- name: Install core utilities
+  community.general.homebrew:
+    name:
+      - curl
+      - wget
+      - git
+      - tmux
+      - jq
+      - yq
+      - gnupg
+      - stow
+      - unzip
+      - zip
+      - nmap
+      - httpie
+      - entr
+      - fzf
+    state: present
+  tags: ["homebrew", "core"]
+
+- name: Install terminal tools
+  community.general.homebrew:
+    name:
+      - starship
+      - btop
+      - neovim
+    state: present
+  tags: ["homebrew", "core"]
+
+- name: Install rust CLI replacements
+  # Pre-compiled bottles — faster than cargo install on macOS.
+  # On Linux these come from the rust role via cargo.
+  community.general.homebrew:
+    name:
+      - eza        # ls
+      - bat        # cat / less
+      - zoxide     # cd
+      - ripgrep    # grep
+      - fd         # find
+      - dust       # du
+      - git-delta  # git diff
+      - sd         # sed
+      - procs      # ps
+      - bandwhich  # network monitor
+      - hyperfine  # benchmark
+      - tealdeer   # tldr / man
+      - tokei      # code stats
+    state: present
+  tags: ["homebrew", "core"]
+
+- name: Install dev tools
+  community.general.homebrew:
+    name:
+      - gh
+      - glab
+      - vault
+      - terragrunt
+      - hadolint
+      - yamllint
+      - tflint
+      - proselint
+      - golangci-lint
+    state: present
+  tags: ["homebrew", "dev"]
+
+- name: Install Lua / Neovim tooling
+  community.general.homebrew:
+    name:
+      - lua
+      - stylua
+      - luacheck
+      - luarocks
+      - lua-language-server
+    state: present
+  tags: ["homebrew", "dev", "neovim"]
+
+- name: Install misc tools
+  community.general.homebrew:
+    name:
+      - gum
+      - glow
+      - speedtest-cli
+      - xdg-ninja
+    state: present
+  tags: ["homebrew", "dev"]
+
+- name: Install k8s / container tools
+  community.general.homebrew:
+    name:
+      - kubernetes-cli
+      - helm
+      - k9s
+      - flux
+      - skopeo
+      - podman
+    state: present
+  tags: ["homebrew", "k8s"]
+
+- name: Install 1Password CLI
+  community.general.homebrew:
+    name: 1password-cli
+    state: present
+  tags: ["homebrew", "1password"]

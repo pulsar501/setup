@@ -1,0 +1,19 @@
+---
+- name: Install GNU compat tools
+  # PATH prepended in .config/path.sh so these shadow BSD utils transparently.
+  # Priority: rust CLIs > these GNU tools > BSD system tools.
+  # brew install coreutils findutils binutils gnu-sed gnu-tar gnu-which gettext gawk gzip grep
+  community.general.homebrew:
+    name:
+      - coreutils
+      - findutils
+      - binutils
+      - gnu-sed
+      - gnu-tar
+      - gnu-which
+      - gettext
+      - gawk
+      - gzip
+      - grep
+    state: present
+  tags: ["homebrew", "core"]

@@ -1,46 +1,48 @@
 ---
+# On macOS helm comes from Homebrew. Linux only.
 - name: Get latest helm version
   ansible.builtin.uri:
     url: https://api.github.com/repos/helm/helm/releases/latest
     body_format: json
     return_content: true
   register: helm_release
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: &helm_tags ["dev", "helm"]
 
 - name: Get helm binary checksum
   vars:
     arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
-    os_type: "{{ 'darwin' if ansible_facts.os_family == 'Darwin' else 'linux' }}"
   ansible.builtin.uri:
-    url: https://get.helm.sh/helm-{{ helm_release.json.tag_name }}-{{ os_type }}-{{ arch }}.tar.gz.sha256sum
+    url: https://get.helm.sh/helm-{{ helm_release.json.tag_name }}-linux-{{ arch }}.tar.gz.sha256sum
     return_content: true
   register: helm_checksum
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *helm_tags
 
-- name: Download archive
+- name: Download helm archive
   become: true
   vars:
     arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
-    os_type: "{{ 'darwin' if ansible_facts.os_family == 'Darwin' else 'linux' }}"
     checksum: "{{ helm_checksum.content.split(' ') }}"
   ansible.builtin.get_url:
-    url: https://get.helm.sh/helm-{{ helm_release.json.tag_name }}-{{ os_type }}-{{ arch }}.tar.gz
+    url: https://get.helm.sh/helm-{{ helm_release.json.tag_name }}-linux-{{ arch }}.tar.gz
     dest: /tmp/helm.tar.gz
     checksum: "sha256:{{ checksum[0] }}"
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *helm_tags
 
-- name: Unpack helm archive
+- name: Unpack helm binary
   become: true
   vars:
     arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
-    os_type: "{{ 'darwin' if ansible_facts.os_family == 'Darwin' else 'linux' }}"
   ansible.builtin.unarchive:
+    src: /tmp/helm.tar.gz
     dest: /usr/local/bin
     extra_opts:
-      - "{{ os_type}}-{{ arch }}/helm"
+      - "linux-{{ arch }}/helm"
       - --strip-components=1
-    src: /tmp/helm.tar.gz
-    mode: 0755
+    mode: "0755"
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *helm_tags
 
 - name: Remove helm install archive
@@ -48,3 +50,5 @@
   ansible.builtin.file:
     path: /tmp/helm.tar.gz
     state: absent
+  when: ansible_facts['os_family'] != 'Darwin'
+  tags: *helm_tags
