@@ -1,21 +1,23 @@
 ---
 # macOS: node/deno/bun/pnpm via Homebrew (formulae.yml).
 
-- name: Install node and deno (Arch)
+- name: Install node (Arch)
   become: true
   community.general.pacman:
     name:
       - nodejs
       - npm
-      - deno
     state: present
   when: ansible_facts['os_family'] == 'Archlinux'
   tags: ["node", "dev"]
 
-- name: Install bun (Arch AUR)
-  ansible.builtin.shell: yay -S --noconfirm --needed bun-bin
+- name: Install deno and bun (Arch AUR)
+  ansible.builtin.shell: yay -S --noconfirm --needed {{ item }}
   become: false
   changed_when: true
+  loop:
+    - deno-bin
+    - bun-bin
   when: ansible_facts['os_family'] == 'Archlinux'
   tags: ["node", "dev"]
 

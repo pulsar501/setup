@@ -96,8 +96,6 @@
 - name: Install misc tools
   community.general.homebrew:
     name:
-      - gum
-      - glow
       - speedtest-cli
       - xdg-ninja
     state: present
