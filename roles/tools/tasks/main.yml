@@ -5,6 +5,10 @@
   tags: ["core", "tool"]
 - include_tasks: entr.yml
   tags: ["dev", "tool"]
+- include_tasks: uv.yml
+  tags: ["dev", "uv"]
+- include_tasks: gleam.yml
+  tags: ["dev", "gleam"]
 - include_tasks: terragrunt.yml
   tags: ["dev", "terragrunt"]
 - include_tasks: tflint.yml

@@ -37,7 +37,7 @@
       - skopeo
       - podman
       - lua-language-server
-      - python-pipx
+      - uv
     state: present
   tags: ["pacman", "core"]
 
@@ -73,6 +73,8 @@
     - vault-bin     # HashiCorp Vault
     - 1password-cli # 1Password CLI
     - xdg-ninja     # XDG compliance checker (localhost.yml handles Debian)
+    - mise-bin      # polyglot tool version manager
+    - gleam-bin     # Gleam language (includes erlang dep)
   tags: ["pacman", "aur"]
 
 - name: Install wslu (WSL utilities for Arch WSL)

@@ -1,7 +1,7 @@
 ---
 # On macOS proselint comes from Homebrew. Linux only.
-- name: Install proselint via pipx
-  ansible.builtin.shell: pipx install proselint
+- name: Install proselint via uv
+  ansible.builtin.shell: uv tool install proselint
   changed_when: true
   when: ansible_facts['os_family'] != 'Darwin'
   tags: ["dev", "proselint"]

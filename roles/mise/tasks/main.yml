@@ -1,0 +1,8 @@
+---
+# Arch: mise-bin via AUR (pacman role). macOS: mise via Homebrew (formulae.yml).
+- name: Install mise (Debian)
+  ansible.builtin.shell: curl https://mise.run | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/share/mise/bin/mise"
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["mise", "core"]

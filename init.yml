@@ -33,7 +33,6 @@
     ZSH: "{{ ansible_env.HOME }}/.config/zsh/ohmyzsh"
     CARGO_HOME: "{{ ansible_env.HOME }}/.local/share/cargo"
     RUSTUP_HOME: "{{ ansible_env.HOME }}/.local/share/rustup"
-    NVM_DIR: "{{ ansible_env.HOME }}/.local/share/nvm"
     BUN_INSTALL: "{{ ansible_env.HOME }}/.local/share/bun"
     GOPATH: "{{ ansible_env.HOME }}/.local/share/go"
     DOCKER_CONFIG: "{{ ansible_env.HOME }}/.config/docker"
@@ -62,6 +61,7 @@
       when: is_debian | bool  # Arch: via pacman AUR; macOS: via homebrew cask
     - rust
     - go
+    - mise
     - role: node
       when: inventory_hostname == "localhost"
     - k8s

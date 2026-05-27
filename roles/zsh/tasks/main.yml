@@ -60,8 +60,6 @@
       user: zsh-users
     - name: zsh-history-substring-search
       user: zsh-users
-    - name: turv
-      user: ppfenning92
   tags: *tags_for_zsh_tasks
 
 # macOS: starship via Homebrew (formulae.yml)

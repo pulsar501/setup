@@ -4,6 +4,7 @@
   ansible.builtin.get_url:
     url: https://github.com/microsoft/cascadia-code/releases/download/v2404.23/CascadiaCode-2404.23.zip
     dest: /tmp/CascadiaCode.zip
+  when: lookup('env', 'DISPLAY') != '' or lookup('env', 'WAYLAND_DISPLAY') != ''
   tags: [ "dev", "fonts" ]
 
 - name: Download Font 0xProto
@@ -11,6 +12,7 @@
   ansible.builtin.get_url:
     url: https://github.com/0xType/0xProto/releases/download/2.100/0xProto_2_100.zip
     dest: /tmp/0xProto.zip
+  when: lookup('env', 'DISPLAY') != '' or lookup('env', 'WAYLAND_DISPLAY') != ''
   tags: [ "dev", "fonts" ]
 
 - name: Unzip Fonts
@@ -21,9 +23,12 @@
   loop:
     - CascadiaCode
     - 0xProto
+  when: lookup('env', 'DISPLAY') != '' or lookup('env', 'WAYLAND_DISPLAY') != ''
   tags: [ "dev", "fonts" ]
 
 - name: Install Fonts
   become: true
-  shell: fc-cache -fvs
+  ansible.builtin.shell: fc-cache -fvs
+  changed_when: true
+  when: lookup('env', 'DISPLAY') != '' or lookup('env', 'WAYLAND_DISPLAY') != ''
   tags: [ "dev", "fonts" ]

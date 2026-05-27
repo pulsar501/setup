@@ -1,0 +1,8 @@
+---
+# Arch: uv via pacman (official extra repo). macOS: uv via Homebrew.
+- name: Install uv (Debian)
+  ansible.builtin.shell: curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/uv"
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["uv", "dev"]

@@ -27,6 +27,7 @@
       - neovim
       - rustup
       - go
+      - mise
       - lazydocker
       - glow
       - gum
@@ -66,6 +67,9 @@
       - tflint
       - proselint
       - golangci-lint
+      - uv
+      - gleam
+      - erlang
     state: present
   tags: ["homebrew", "dev"]
 

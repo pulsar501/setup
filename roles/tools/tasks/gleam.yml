@@ -1,0 +1,30 @@
+---
+# Arch: gleam-bin via AUR (pacman role). macOS: brew install gleam.
+- name: Install erlang runtime (Debian)
+  become: true
+  ansible.builtin.apt:
+    name: erlang-nox
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["gleam", "dev"]
+
+- name: Get latest gleam version (Debian)
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/gleam-lang/gleam/releases/latest
+    return_content: true
+  register: gleam_release
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["gleam", "dev"]
+
+- name: Install gleam binary (Debian)
+  become: true
+  vars:
+    gleam_arch: "{{ 'x86_64' if ansible_architecture == 'x86_64' else 'aarch64' }}"
+    gleam_ver: "{{ gleam_release.json.tag_name }}"
+  ansible.builtin.unarchive:
+    src: "https://github.com/gleam-lang/gleam/releases/download/{{ gleam_ver }}/gleam-{{ gleam_ver }}-{{ gleam_arch }}-unknown-linux-musl.tar.gz"
+    dest: /usr/local/bin
+    remote_src: true
+    mode: "0755"
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["gleam", "dev"]

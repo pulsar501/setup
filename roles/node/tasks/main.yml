@@ -1,42 +1,14 @@
 ---
-- name: Ensure Global config
-  become: true
-  ansible.builtin.blockinfile:
-    dest: /etc/npmrc
-    block: "{{ lookup('template', 'npmrc.j2') }}"
-    marker: "# {mark} ANSIBLE MANAGED"
-  tags:
-    - node
-    - dev
-- name: Ensure nvm dir exits
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.local/share/nvm"
-    state: directory
-    mode: "0755"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-  tags:
-    - node
-    - dev
-
-- name: Nvm
-  ansible.builtin.shell: |
-    set -o pipefail
-    PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
-  args:
-    creates: "{{ ansible_env.HOME }}/.local/share/nvm"
-  tags:
-    - node
-    - dev
-
-- name: Install bun
-  ansible.builtin.shell: |
-    set -o pipefail
-    curl -fSsL https://bun.sh/install | bash
+- name: Install node/deno/bun via mise
+  ansible.builtin.shell: mise use --global node@latest deno@latest bun@latest
+  changed_when: true
   environment:
-    BUN_INSTALL: "{{ ansible_env.HOME }}/.local/share/bun"
-  args:
-    creates: "{{ ansible_env.HOME }}/.local/share/bun"
-  tags:
-    - node
-    - dev
+    PATH: "{{ ansible_env.HOME }}/.local/share/mise/bin:/opt/homebrew/bin:{{ ansible_env.PATH }}"
+  tags: ["node", "dev"]
+
+- name: Install pnpm globally
+  ansible.builtin.shell: npm install -g pnpm
+  changed_when: true
+  environment:
+    PATH: "{{ ansible_env.HOME }}/.local/share/mise/shims:{{ ansible_env.HOME }}/.local/share/mise/bin:/opt/homebrew/bin:{{ ansible_env.PATH }}"
+  tags: ["node", "dev"]
