@@ -27,12 +27,21 @@
       - neovim
       - rustup
       - go
-      - mise
       - lazydocker
       - glow
       - gum
     state: present
   tags: ["homebrew", "core"]
+
+- name: Install node/JS tools
+  community.general.homebrew:
+    name:
+      - node
+      - deno
+      - bun
+      - pnpm
+    state: present
+  tags: ["homebrew", "node"]
 
 - name: Install rust CLI replacements
   # Pre-compiled bottles — faster than cargo install on macOS.

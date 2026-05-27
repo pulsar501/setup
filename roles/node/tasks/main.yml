@@ -1,14 +1,60 @@
 ---
-- name: Install node/deno/bun via mise
-  ansible.builtin.shell: mise use --global node@latest deno@latest bun@latest
-  changed_when: true
-  environment:
-    PATH: "{{ ansible_env.HOME }}/.local/share/mise/bin:/opt/homebrew/bin:{{ ansible_env.PATH }}"
+# macOS: node/deno/bun/pnpm via Homebrew (formulae.yml).
+
+- name: Install node and deno (Arch)
+  become: true
+  community.general.pacman:
+    name:
+      - nodejs
+      - npm
+      - deno
+    state: present
+  when: ansible_facts['os_family'] == 'Archlinux'
   tags: ["node", "dev"]
 
-- name: Install pnpm globally
+- name: Install bun (Arch AUR)
+  ansible.builtin.shell: yay -S --noconfirm --needed bun-bin
+  become: false
+  changed_when: true
+  when: ansible_facts['os_family'] == 'Archlinux'
+  tags: ["node", "dev"]
+
+- name: Add NodeSource LTS repo (Debian)
+  become: true
+  ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+  changed_when: true
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["node", "dev"]
+
+- name: Install node (Debian)
+  become: true
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["node", "dev"]
+
+- name: Install deno (Debian)
+  ansible.builtin.shell: curl -fsSL https://deno.land/install.sh | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/deno"
+  environment:
+    DENO_INSTALL: "{{ ansible_env.HOME }}/.local"
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["node", "dev"]
+
+- name: Install bun (Debian)
+  ansible.builtin.shell: curl -fsSL https://bun.sh/install | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/share/bun/bin/bun"
+  environment:
+    BUN_INSTALL: "{{ ansible_env.HOME }}/.local/share/bun"
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["node", "dev"]
+
+- name: Install pnpm globally (Linux)
   ansible.builtin.shell: npm install -g pnpm
   changed_when: true
-  environment:
-    PATH: "{{ ansible_env.HOME }}/.local/share/mise/shims:{{ ansible_env.HOME }}/.local/share/mise/bin:/opt/homebrew/bin:{{ ansible_env.PATH }}"
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: ["node", "dev"]

@@ -73,7 +73,6 @@
     - vault-bin     # HashiCorp Vault
     - 1password-cli # 1Password CLI
     - xdg-ninja     # XDG compliance checker (localhost.yml handles Debian)
-    - mise-bin      # polyglot tool version manager
     - gleam-bin     # Gleam language (includes erlang dep)
   tags: ["pacman", "aur"]
 
