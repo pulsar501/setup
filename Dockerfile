@@ -1,26 +1,34 @@
 FROM docker.io/library/ubuntu:24.04
 
-ENV TZ="Europe/Berlin"
+ENV TZ=Europe/Berlin \
+    DEBIAN_FRONTEND=noninteractive \
+    USER=p \
+    HOME=/home/p \
+    XDG_CONFIG_HOME=/home/p/.config \
+    XDG_CACHE_HOME=/home/p/.cache \
+    XDG_DATA_HOME=/home/p/.local/share \
+    XDG_STATE_HOME=/home/p/.local/state \
+    PATH="/home/p/.local/bin:/home/p/.local/share/mise/shims:$PATH"
 
-ENV USER=p
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+      curl git zsh bash stow ca-certificates sudo tzdata && \
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
 ARG PASS=p
+RUN useradd -ms /bin/bash $USER && \
+    echo "${USER}:${PASS}" | chpasswd && \
+    echo "$USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# update
-RUN apt update -qqq && apt upgrade -y && apt dist-upgrade -y && apt autoremove -y
-RUN apt install sudo git -y
-
-RUN  echo "$TZ" > /etc/timezone \
-  DEBIAN_FRONTEND=noninteractive apt install -y tzdata \
-  dpkg-reconfigure --frontend noninteractive tzdata
-
-# add user
-RUN useradd -ms /bin/bash $USER
-RUN echo "${USER}:${PASS}" | chpasswd
-RUN usermod -aG sudo $USER
-
-ENV PATH="$PATH:/home/${USER}/.local/bin"
 USER $USER
 
-WORKDIR /home/$USER
+RUN curl -fsSL https://mise.run | sh
 
+COPY --chown=$USER docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+WORKDIR $HOME
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["bats", ".dotfiles/tests/"]

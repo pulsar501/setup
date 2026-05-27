@@ -5,6 +5,8 @@
   tags: [ "core", "tool" ]
 - include_tasks: entr.yml
   tags: [ "dev", "tool" ]
+- include_tasks: glab.yml
+  tags: [ "dev", "glab" ]
   when: inventory_hostname == "localhost"
 - include_tasks: localhost.yml
   tags: [ "dev", "tool" ]

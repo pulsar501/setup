@@ -9,11 +9,13 @@
     mode: "0755"
     recurse: true
   loop:
-    - "{{ ansible_env.HOME}}/code"
+    - "{{ ansible_env.HOME }}/code"
     - "{{ ansible_env.XDG_CONFIG_HOME }}"
     - "{{ ansible_env.XDG_DATA_HOME }}"
     - "{{ ansible_env.XDG_CACHE_HOME }}"
     - "{{ ansible_env.XDG_STATE_HOME }}"
+    - "{{ ansible_env.HOME }}/.local/bin"
+    - "{{ ansible_env.XDG_STATE_HOME }}/zsh"
   tags:
     - core
 
