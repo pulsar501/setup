@@ -25,6 +25,7 @@
       - starship
       - btop
       - neovim
+      - rustup
     state: present
   tags: ["homebrew", "core"]
 

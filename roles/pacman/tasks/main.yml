@@ -29,6 +29,8 @@
       - fontconfig
       - libtool
       - imagemagick
+      - neovim
+      - rustup
       - luarocks
       - skopeo
       - podman

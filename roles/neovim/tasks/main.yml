@@ -1,50 +1,44 @@
 ---
-- name: Clone Neovim
-  ansible.builtin.git:
-    repo: "https://github.com/neovim/neovim.git"
-    dest: "{{ ansible_env.HOME }}/neovim"
-    update: true
-  changed_when: true
-  tags:
-    - core
-    - neovim
+# macOS: neovim via Homebrew (formulae.yml)
+# Arch:  neovim via pacman (official extra repo)
+# Debian: Ubuntu ships an outdated neovim — build from source
 
-- name: Build neovim
-  ansible.builtin.shell: "cd {{ ansible_env.HOME }}/neovim && make -j 20"
-  changed_when: true
-  tags:
-    - core
-    - neovim
-
-- name: Install neovim
-  become: true
-  ansible.builtin.shell: "cd {{ ansible_env.HOME }}/neovim && make install"
-  changed_when: true
-  tags:
-    - core
-    - neovim
-
-- name: Neovim Plugin Development 1
+- name: Install neovim build dependencies (Debian)
   become: true
   ansible.builtin.apt:
     name:
-      - luarocks
-  tags:
-    - dev
-    - neovim
+      - ninja-build
+      - cmake
+      - gettext
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["core", "neovim"]
 
-- name: Neovim Plugin Development 2 luacheck
-  become: true
-  ansible.builtin.command: luarocks install luacheck
+- name: Clone neovim (Debian)
+  ansible.builtin.git:
+    repo: https://github.com/neovim/neovim.git
+    dest: "{{ ansible_env.HOME }}/neovim"
+    update: true
   changed_when: true
-  tags:
-    - dev
-    - neovim
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["core", "neovim"]
 
-- name: Remove neovim src dir
+- name: Build neovim (Debian)
+  ansible.builtin.shell: "cd {{ ansible_env.HOME }}/neovim && make -j$(nproc)"
+  changed_when: true
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["core", "neovim"]
+
+- name: Install neovim (Debian)
+  become: true
+  ansible.builtin.shell: "cd {{ ansible_env.HOME }}/neovim && make install"
+  changed_when: true
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["core", "neovim"]
+
+- name: Remove neovim src dir (Debian)
   ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/neovim"
     state: absent
-  tags:
-    - core
-    - neovim
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["core", "neovim"]

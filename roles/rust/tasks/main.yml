@@ -1,24 +1,31 @@
 ---
-- name: Install rustup
+# rustup install strategy:
+# macOS:  brew install rustup  (homebrew formulae.yml)
+# Arch:   pacman -S rustup     (pacman role)
+# Debian: curl — apt/pacman versions are outdated or absent
+
+- name: Install rustup via curl (Debian)
   ansible.builtin.shell: |
     set -o pipefail;
     curl https://sh.rustup.rs -sSf | sh -s -- --profile=complete --no-modify-path -y
   changed_when: true
-  tags:
-    - core
-    - update
-    - rust
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["core", "update", "rust"]
 
-- name: Set rust to stable
+- name: Set rust toolchain to stable (Debian — rustup in CARGO_HOME)
   ansible.builtin.shell: $CARGO_HOME/bin/rustup default stable
   changed_when: true
-  tags:
-    - core
-    - update
-    - rust
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["core", "update", "rust"]
 
-- name: Install core CLI tools (rust rewrites for common utils)
-  # On macOS these come from Homebrew (pre-compiled bottles). Linux only.
+- name: Set rust toolchain to stable (Arch — rustup in /usr/bin)
+  ansible.builtin.shell: rustup default stable
+  changed_when: true
+  when: ansible_facts['os_family'] == 'Archlinux'
+  tags: ["core", "update", "rust"]
+
+- name: Install core CLI tools via cargo (Linux)
+  # macOS: Homebrew pre-compiled bottles (formulae.yml). Linux only.
   ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
   changed_when: true
   when: ansible_facts['os_family'] != 'Darwin'
@@ -28,13 +35,10 @@
     - zoxide     # cd
     - eva        # calc
     - starship   # prompt
-  tags:
-    - core
-    - update
-    - rust
+  tags: ["core", "update", "rust"]
 
-- name: Install dev CLI tools (rust rewrites)
-  # On macOS these come from Homebrew (pre-compiled bottles). Linux only.
+- name: Install dev CLI tools via cargo (Linux)
+  # macOS: Homebrew pre-compiled bottles (formulae.yml). Linux only.
   ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
   changed_when: true
   when: ansible_facts['os_family'] != 'Darwin'
@@ -42,26 +46,20 @@
     - ripgrep    # grep
     - fd-find    # find
     - du-dust    # du
-    - sd         # sed (simple substitutions)
+    - sd         # sed
     - procs      # ps
     - bandwhich  # network monitor
-    - hyperfine  # benchmarking / time
+    - hyperfine  # benchmark
     - tealdeer   # tldr / man
     - delta      # git diff viewer
     - tokei      # code stats
-  tags:
-    - dev
-    - update
-    - rust
+  tags: ["dev", "update", "rust"]
 
-- name: Install neovim tooling
-  # On macOS stylua comes from Homebrew. Linux only.
+- name: Install neovim tooling via cargo (Linux)
+  # macOS: stylua via Homebrew. Linux only.
   ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}
   changed_when: true
   when: ansible_facts['os_family'] != 'Darwin'
   loop:
     - stylua
-  tags:
-    - dev
-    - neovim
-    - rust
+  tags: ["dev", "neovim", "rust"]
