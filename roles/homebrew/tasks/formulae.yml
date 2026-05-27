@@ -26,6 +26,10 @@
       - btop
       - neovim
       - rustup
+      - go
+      - lazydocker
+      - glow
+      - gum
     state: present
   tags: ["homebrew", "core"]
 

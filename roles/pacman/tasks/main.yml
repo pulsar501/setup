@@ -31,6 +31,8 @@
       - imagemagick
       - neovim
       - rustup
+      - go
+      - zsh
       - luarocks
       - skopeo
       - podman
@@ -70,6 +72,7 @@
     - luacheck      # Lua linter
     - vault-bin     # HashiCorp Vault
     - 1password-cli # 1Password CLI
+    - xdg-ninja     # XDG compliance checker (localhost.yml handles Debian)
   tags: ["pacman", "aur"]
 
 - name: Install wslu (WSL utilities for Arch WSL)

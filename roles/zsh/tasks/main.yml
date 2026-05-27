@@ -1,26 +1,29 @@
 ---
-- name: Install ZSH
+# zsh is pre-installed on macOS; Arch gets it via pacman (added to pacman role)
+- name: Install zsh (Debian)
   become: true
   ansible.builtin.apt:
-    name:
-      - zsh
+    name: zsh
+  when: ansible_facts['os_family'] == 'Debian'
   tags: &tags_for_zsh_tasks ["core", "zsh"]
 
+# macOS defaults to zsh since Catalina — skip chsh there
 - name: Change shell to zsh
   become: true
   ansible.builtin.shell: chsh --shell $(which zsh) {{ me }}
   changed_when: true
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *tags_for_zsh_tasks
 
 - name: Configure global zshenv
   become: true
   ansible.builtin.blockinfile:
     block: "{{ lookup('template', 'etc_zshenv.j2') }}"
-    dest: /etc/zsh/zshenv
+    dest: "{{ '/etc/zshenv' if ansible_facts['os_family'] == 'Darwin' else '/etc/zsh/zshenv' }}"
     marker: "# {mark} ANSIBLE MANAGED"
   tags: *tags_for_zsh_tasks
 
-- name: Check that the oh-my-zsh exists
+- name: Check that oh-my-zsh exists
   ansible.builtin.stat:
     path: "{{ ansible_env.HOME }}/.config/zsh/ohmyzsh"
   register: oh_my_stats
@@ -31,8 +34,8 @@
     source {{ ansible_env.HOME }}/.bashrc
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
   changed_when: true
-  tags: *tags_for_zsh_tasks
   when: not oh_my_stats.stat.exists
+  tags: *tags_for_zsh_tasks
 
 - name: Install zsh plugins
   ansible.builtin.shell: |
@@ -61,10 +64,12 @@
       user: ppfenning92
   tags: *tags_for_zsh_tasks
 
-- name: Install Starship
+# macOS: starship via Homebrew (formulae.yml)
+- name: Install Starship (Linux)
   become: true
   ansible.builtin.shell: |
     set -o pipefail;
     curl -sS https://starship.rs/install.sh | sh -s -- -y
   changed_when: true
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: *tags_for_zsh_tasks

@@ -1,44 +1,89 @@
 ---
-- name: Download go
+# Go installation strategy:
+# Debian: fetch latest from go.dev (apt is extremely outdated)
+# Arch:   pacman -S go (rolling, always current)
+# macOS:  brew install go (added to homebrew formulae)
+
+- name: Get latest Go version (Debian)
+  ansible.builtin.uri:
+    url: https://go.dev/VERSION?m=text
+    return_content: true
+  register: go_latest
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["go", "dev"]
+
+- name: Set Go version fact (Debian)
+  ansible.builtin.set_fact:
+    go_ver: "{{ go_latest.content.split('\n')[0] }}"
+  when: ansible_facts['os_family'] == 'Debian'
+  tags: ["go", "dev"]
+
+- name: Download Go (Debian)
   vars:
     arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
   ansible.builtin.get_url:
-    url: https://go.dev/dl/go1.23.0.linux-{{ arch }}.tar.gz
-    dest: /tmp/go1.23.0.tar.gz
+    url: "https://go.dev/dl/{{ go_ver }}.linux-{{ arch }}.tar.gz"
+    dest: "/tmp/{{ go_ver }}.tar.gz"
     mode: "0644"
+  when: ansible_facts['os_family'] == 'Debian'
   tags: ["go", "dev"]
 
-- name: Extract go arch={{ ansible_architecture }} {{ inventory_hostname }}
+- name: Extract Go (Debian)
   become: true
   ansible.builtin.unarchive:
-    src: /tmp/go1.23.0.tar.gz
+    src: "/tmp/{{ go_ver }}.tar.gz"
     dest: /usr/local
-    remote_src: "{{ inventory_hostname != 'localhost' }}"
+    remote_src: true
+  when: ansible_facts['os_family'] == 'Debian'
   tags: ["go", "dev"]
 
-- name: Remove installer
+- name: Remove Go installer (Debian)
   ansible.builtin.file:
-    path: /tmp/go1.23.0.tar.gz
+    path: "/tmp/{{ go_ver }}.tar.gz"
     state: absent
+  when: ansible_facts['os_family'] == 'Debian'
   tags: ["go", "dev"]
 
-- name: Go tools
-  ansible.builtin.shell: |
-    GOPATH="$XDG_DATA_HOME"/go /usr/local/go/bin/go install {{ item }}
+- name: Install Go (Arch)
+  become: true
+  community.general.pacman:
+    name: go
+    state: present
+  when: ansible_facts['os_family'] == 'Archlinux'
+  tags: ["go", "dev"]
+
+- name: Install terminal tools via go (Linux)
+  # macOS: glow and gum come from Homebrew
+  ansible.builtin.shell: go install {{ item }}
   changed_when: true
+  environment:
+    PATH: "/usr/local/go/bin:/usr/bin:{{ ansible_env.PATH }}"
+    GOPATH: "{{ ansible_env.HOME }}/.local/share/go"
   loop:
     - github.com/charmbracelet/glow@latest
     - github.com/charmbracelet/gum@latest
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: ["go", "dev"]
 
-- name: Go dev-tools
-  ansible.builtin.shell: |
-    GOPATH="$XDG_DATA_HOME"/go /usr/local/go/bin/go install {{ item }}
+- name: Install Go dev tools
+  # PATH covers Debian (/usr/local/go/bin), Arch (/usr/bin), macOS (/opt/homebrew/bin)
+  ansible.builtin.shell: go install {{ item }}
   changed_when: true
+  environment:
+    PATH: "/usr/local/go/bin:/usr/bin:/opt/homebrew/bin:{{ ansible_env.PATH }}"
+    GOPATH: "{{ ansible_env.HOME }}/.local/share/go"
   loop:
     - github.com/incu6us/goimports-reviser/v3@latest
     - mvdan.cc/gofumpt@latest
     - github.com/segmentio/golines@latest
-    - github.com/jesseduffield/lazydocker@latest
-    - github.com/mikefarah/yq/v4@latest
+  tags: ["go", "dev"]
+
+- name: Install lazydocker via go (Linux)
+  # macOS: lazydocker via Homebrew (formulae.yml)
+  ansible.builtin.shell: go install github.com/jesseduffield/lazydocker@latest
+  changed_when: true
+  environment:
+    PATH: "/usr/local/go/bin:/usr/bin:{{ ansible_env.PATH }}"
+    GOPATH: "{{ ansible_env.HOME }}/.local/share/go"
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: ["go", "dev"]

@@ -1,5 +1,6 @@
 ---
-- name: Install XDG Ninja
+# macOS: xdg-ninja via Homebrew; Arch: via AUR (pacman role). Debian only.
+- name: Install XDG Ninja (Debian)
   become: true
   changed_when: true
   ansible.builtin.git:
@@ -8,21 +9,24 @@
     dest: /opt/xdg-ninja
     update: true
     force: true
+  when: ansible_facts['os_family'] == 'Debian'
   tags: ["dev", "tool"]
 
-- name: Prepare httpie install
+# macOS: httpie via Homebrew; Arch: python-httpie via pacman. Debian only.
+- name: Prepare httpie apt repo (Debian)
   become: true
   vars:
     arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
   ansible.builtin.shell: |
     curl -SsL https://packages.httpie.io/deb/KEY.gpg | gpg --dearmor --yes -o /usr/share/keyrings/httpie.gpg
     echo "deb [arch={{ arch }} signed-by=/usr/share/keyrings/httpie.gpg] https://packages.httpie.io/deb ./" > /etc/apt/sources.list.d/httpie.list
+  when: ansible_facts['os_family'] == 'Debian'
   tags: ["dev", "tool"]
 
-- name: Install httpie
+- name: Install httpie (Debian)
   become: true
   ansible.builtin.apt:
     update_cache: true
-    name:
-      - httpie
+    name: httpie
+  when: ansible_facts['os_family'] == 'Debian'
   tags: ["dev", "tool"]

@@ -1,24 +1,29 @@
 ---
+# macOS: fzf via Homebrew (formulae.yml). Linux only.
 - name: Clone fzf
   ansible.builtin.git:
     repo: https://github.com/junegunn/fzf.git
     depth: 1
     dest: /opt/fzf
     force: true
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: ["core", "tool"]
 
 - name: Install fzf
   ansible.builtin.shell: |
     bash -c "/opt/fzf/install --all --xdg --key-bindings --completion --no-update-rc"
   changed_when: true
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: ["core", "tool"]
 
+# macOS: glow uses its own theme config; glamour build is Linux only
 - name: Clone Glamour catppuccin themes
   ansible.builtin.git:
     repo: https://github.com/catppuccin/glamour.git
     version: v1.0.0
     dest: /opt/catppuccin/glamour
     force: true
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: ["core", "tool"]
 
 - name: Build Glamour themes
@@ -29,4 +34,5 @@
     python src/generate.py
   args:
     chdir: /opt/catppuccin/glamour/
+  when: ansible_facts['os_family'] != 'Darwin'
   tags: ["core", "tool"]
