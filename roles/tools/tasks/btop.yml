@@ -16,9 +16,9 @@
 - name: Set btop architecture
   vars:
     arch_map:
-      x86_64: x86_64
-      aarch64: aarch64
-      arm64: aarch64
+      x86_64: x86_64-unknown
+      aarch64: aarch64-unknown
+      arm64: aarch64-unknown
   ansible.builtin.set_fact:
     btop_arch: "{{ arch_map[ansible_architecture] | default(ansible_architecture) }}"
   tags: *btop_tags
@@ -26,8 +26,8 @@
 
 - name: Download btop
   ansible.builtin.get_url:
-    url: "https://github.com/aristocratos/btop/releases/download/{{ btop_version }}/btop-{{ btop_arch }}-linux-musl.tbz"
-    dest: "/tmp/btop-{{ btop_arch }}-linux-musl.tar.bz2"
+    url: "https://github.com/aristocratos/btop/releases/download/{{ btop_version }}/btop-{{ btop_arch }}-linux-musl.tar.gz"
+    dest: "/tmp/btop-{{ btop_arch }}-linux-musl.tar.gz"
     mode: "0755"
     force: true
   tags: *btop_tags
@@ -35,7 +35,7 @@
 
 - name: Unpack btop
   ansible.builtin.unarchive:
-    src: "/tmp/btop-{{ btop_arch }}-linux-musl.tar.bz2"
+    src: "/tmp/btop-{{ btop_arch }}-linux-musl.tar.gz"
     dest: /opt/
     mode: "0755"
   tags: *btop_tags
