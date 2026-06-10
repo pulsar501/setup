@@ -30,16 +30,13 @@
   tags: *tags_for_zsh_tasks
 
 - name: Oh-My-Zsh
-  ansible.builtin.shell: |
-    source {{ ansible_env.HOME }}/.bashrc
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
   changed_when: true
   when: not oh_my_stats.stat.exists
   tags: *tags_for_zsh_tasks
 
 - name: Install zsh plugins
   ansible.builtin.shell: |
-    source {{ ansible_env.HOME }}/.bashrc
     PLUGIN_DIR="$ZSH/custom/plugins/{{ item.name }}"
     if [[ -d "$PLUGIN_DIR" ]]; then
       cd "$PLUGIN_DIR" && git pull

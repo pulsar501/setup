@@ -61,8 +61,7 @@
       when: is_debian | bool  # Arch: via pacman AUR; macOS: via homebrew cask
     - rust
     - go
-    - role: node
-      when: inventory_hostname == "localhost"
+    - node
     - k8s
     - role: motd
       when: is_debian | bool

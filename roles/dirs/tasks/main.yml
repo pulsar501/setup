@@ -28,6 +28,7 @@
     group: "{{ ansible_user }}"
     mode: "0755"
     recurse: true
+  when: is_linux | bool
   tags:
     - core
 

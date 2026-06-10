@@ -10,6 +10,9 @@ ENV TZ=Europe/Berlin \
     XDG_STATE_HOME=/home/p/.local/state \
     PATH="/home/p/.local/bin:/home/p/.local/share/mise/shims:$PATH"
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# hadolint ignore=DL3008
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
       curl git zsh bash stow ca-certificates sudo tzdata && \
