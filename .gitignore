@@ -1,1 +1,44 @@
-.idea
+### Helm template
+# Chart dependencies
+**/charts/*.tgz
+
+# mise
+mise.local.toml
+
+# secrets
+.env
+.env.local
+.env.*.local
+
+# kubeconfigs
+kubeconfig
+kubeconfig.*
+*.kubeconfig
+.kube/
+
+# terraform / opentofu / terragrunt
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terragrunt-cache/
+*.tfvars
+
+# os
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# caches
+.cache/
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+dist/
