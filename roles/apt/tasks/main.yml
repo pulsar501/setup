@@ -3,6 +3,8 @@
   tags: ["dev", "gh"]
 - include_tasks: vault.yml
   tags: ["dev", "vault"]
+- include_tasks: snap.yml
+  tags: ["snap"]
 
 - name: "Install core packages"
   become: true
@@ -23,6 +25,7 @@
       - xdg-utils
       - yamllint
       - stow
+      - figlet
       - build-essential
       - pkg-config
       - libfontconfig

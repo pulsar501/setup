@@ -1,0 +1,46 @@
+---
+- name: Check if snap is available
+  ansible.builtin.command: which snap
+  register: snap_exists
+  failed_when: false
+  changed_when: false
+
+- name: Remove snap packages
+  become: true
+  ansible.builtin.command: snap remove --purge {{ item }}
+  loop:
+    - bash-language-server
+    - yaml-language-server
+    - core24
+    - snapd
+  when: snap_exists.rc == 0
+  ignore_errors: true
+
+- name: Purge snapd apt package
+  become: true
+  ansible.builtin.apt:
+    name: snapd
+    state: absent
+    purge: true
+    autoremove: true
+
+- name: Hold snapd to prevent reinstall
+  become: true
+  ansible.builtin.dpkg_selections:
+    name: snapd
+    selection: hold
+
+- name: Pin snapd out of apt
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/preferences.d/no-snap
+    content: |
+      Package: snapd
+      Pin: release a=*
+      Pin-Priority: -10
+    mode: "0644"
+
+- name: Remove ~/snap directory
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/snap"
+    state: absent

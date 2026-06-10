@@ -37,6 +37,12 @@
     - starship   # prompt
   tags: ["core", "update", "rust"]
 
+- name: Rebuild bat theme cache
+  ansible.builtin.command: $CARGO_HOME/bin/bat cache --build
+  when: ansible_facts['os_family'] != 'Darwin'
+  changed_when: true
+  tags: ["core", "update", "rust", "bat"]
+
 - name: Install dev CLI tools via cargo (Linux)
   # macOS: Homebrew pre-compiled bottles (formulae.yml). Linux only.
   ansible.builtin.shell: $CARGO_HOME/bin/cargo install {{ item }}

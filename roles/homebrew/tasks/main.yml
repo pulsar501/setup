@@ -7,3 +7,8 @@
   tags: ["homebrew", "core", "dev"]
 - include_tasks: casks.yml
   tags: ["homebrew", "cask"]
+
+- name: Rebuild bat theme cache (macOS)
+  ansible.builtin.command: bat cache --build
+  changed_when: true
+  tags: ["homebrew", "core", "bat"]

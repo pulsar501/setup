@@ -64,3 +64,5 @@
     - role: node
       when: inventory_hostname == "localhost"
     - k8s
+    - role: motd
+      when: is_debian | bool

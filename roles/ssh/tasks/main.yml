@@ -28,6 +28,24 @@
     - ssh
     - dev
 
+- name: Suppress last login line in SSH banner
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PrintLastLog'
+    line: 'PrintLastLog no'
+  register: sshd_config_changed
+  when: is_debian | bool
+  tags: [ssh]
+
+- name: Restart ssh after config change
+  become: true
+  ansible.builtin.service:
+    name: ssh
+    state: restarted
+  when: is_debian | bool and sshd_config_changed.changed
+  tags: [ssh]
+
 - name: Set git known_hosts
   ansible.builtin.shell: |
     ssh-keyscan -H github.com >> ~/.ssh/known_hosts
