@@ -5,7 +5,6 @@
 
 [tools]
 pre-commit = "4.6.0"
-glab = "1.100.0"
 
 [hooks]
 enter = """
