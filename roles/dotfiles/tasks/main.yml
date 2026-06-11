@@ -15,14 +15,15 @@
 - name: Stow
   ansible.builtin.command: chdir={{ ansible_env.HOME }}/.dotfiles stow . -d . -t "{{ ansible_env.HOME }}"
 
-- name: Set disable admin-flag file
+- name: Create sudoers drop-in for admin_flag (Linux)
   become: true
   ansible.builtin.file:
     path: /etc/sudoers.d/disable_admin_flag
     state: touch
     mode: "644"
+  when: is_linux | bool
 
-- name: Set disable admin-flag file
+- name: Disable admin_flag in sudoers (Linux)
   become: true
   ansible.builtin.blockinfile:
     marker: "### ANSIBLE MANAGED"
@@ -30,3 +31,4 @@
     insertafter: EOF
     block: |
       Defaults !admin_flag
+  when: is_linux | bool

@@ -1,0 +1,64 @@
+---
+# Lightweight tool installer for server/cluster/SBC targets.
+# Uses apt repos instead of cargo/go — no toolchain required.
+
+- name: Add eza apt key
+  become: true
+  ansible.builtin.shell: |
+    mkdir -p /etc/apt/keyrings
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
+      | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    chmod 644 /etc/apt/keyrings/gierens.gpg
+  args:
+    creates: /etc/apt/keyrings/gierens.gpg
+  tags: ["core", "tool", "low-power"]
+
+- name: Add eza apt repository
+  become: true
+  ansible.builtin.shell: |
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
+      > /etc/apt/sources.list.d/gierens.list
+    chmod 644 /etc/apt/sources.list.d/gierens.list
+  args:
+    creates: /etc/apt/sources.list.d/gierens.list
+  tags: ["core", "tool", "low-power"]
+
+- name: Add Charm apt key
+  become: true
+  ansible.builtin.shell: |
+    mkdir -p /etc/apt/keyrings
+    curl -fsSL https://repo.charm.sh/apt/gpg.key \
+      | gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+    chmod 644 /etc/apt/keyrings/charm.gpg
+  args:
+    creates: /etc/apt/keyrings/charm.gpg
+  tags: ["core", "tool", "low-power"]
+
+- name: Add Charm apt repository
+  become: true
+  ansible.builtin.shell: |
+    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" \
+      > /etc/apt/sources.list.d/charm.list
+    chmod 644 /etc/apt/sources.list.d/charm.list
+  args:
+    creates: /etc/apt/sources.list.d/charm.list
+  tags: ["core", "tool", "low-power"]
+
+- name: Install eza, glow, gum via apt
+  become: true
+  ansible.builtin.apt:
+    name:
+      - eza
+      - glow
+      - gum
+    update_cache: true
+    state: present
+  tags: ["core", "tool", "low-power"]
+
+- name: Install zoxide
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/zoxide"
+  tags: ["core", "tool", "low-power"]

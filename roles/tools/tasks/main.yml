@@ -29,3 +29,6 @@
 - include_tasks: localhost.yml
   tags: ["dev", "tool"]
   when: inventory_hostname == "localhost"
+- include_tasks: low_power.yml
+  tags: ["core", "tool", "low-power"]
+  when: inventory_hostname != "localhost" and ansible_facts['os_family'] == 'Debian'

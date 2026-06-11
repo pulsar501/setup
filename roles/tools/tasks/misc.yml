@@ -10,8 +10,7 @@
   tags: ["core", "tool"]
 
 - name: Install fzf
-  ansible.builtin.shell: |
-    bash -c "/opt/fzf/install --all --xdg --key-bindings --completion --no-update-rc"
+  ansible.builtin.shell: bash -c "/opt/fzf/install --all --xdg --key-bindings --completion --no-update-rc"
   changed_when: true
   when: ansible_facts['os_family'] != 'Darwin'
   tags: ["core", "tool"]
@@ -27,12 +26,11 @@
   tags: ["core", "tool"]
 
 - name: Build Glamour themes
-  become: true
   changed_when: true
-  ansible.builtin.shell: |
-    pip install -r requirements.txt --break-system-packages
-    python src/generate.py
+  ansible.builtin.shell: uv run --with-requirements requirements.txt python src/generate.py
   args:
     chdir: /opt/catppuccin/glamour/
+  environment:
+    PATH: "{{ ansible_env.HOME }}/.local/bin:/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}"
   when: ansible_facts['os_family'] != 'Darwin'
   tags: ["core", "tool"]
