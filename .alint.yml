@@ -7,4 +7,6 @@ extends:
   - alint://bundled/agent-hygiene@v1
   - alint://bundled/agent-context@v1
   # renovate: datasource=gitlab-tags depName=ptrck-sh/templates/project-template-default
-  - https://gitlab.com/ptrck-sh/templates/project-template-default/-/raw/1.1.1/.alint/base.yml#sha256-dd2c733ff2917c7576333dc35eeee140f9c0661d9aa6725aae783f07a30af690
+  - https://gitlab.com/ptrck-sh/templates/project-template-default/-/raw/1.2.1/.alint/base.yml#sha256-cb6456c93851bcefe334a5b3fb2bf90dee1f736f6555f518ba2f96b0d3742794
+  # renovate: datasource=gitlab-tags depName=ptrck-sh/templates/project-template-default
+  - https://gitlab.com/ptrck-sh/templates/project-template-default/-/raw/1.2.1/.alint/profiles/container.yml#sha256-c260b47513c367cd8a78685de7eed12495e86c0a5023c569c1cc6f3ded2043a8
